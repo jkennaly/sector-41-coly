@@ -4,7 +4,6 @@ const Schema = schema.Schema;
 class Player extends Schema {
   constructor(options) {
     super();
-    console.log('Player options:', options);
     this.roll = 0;
     this.sub = options.sub;
     this.id = options?.auth?.id;
