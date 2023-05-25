@@ -4,8 +4,8 @@ import { monitor } from "@colyseus/monitor";
 /**
  * Import your Room files
  */
-import { MyRoom } from "./rooms/MyRoom.js";
 import { DiceGameRoom } from "./rooms/DiceGameRoom.js"; // Import DiceGameRoom
+import { LobbyRoom } from "./rooms/LobbyRoom.js"; // Import LobbyRoom
 
 export default config.default({
 
@@ -13,8 +13,9 @@ export default config.default({
         /**
          * Define your room handlers:
          */
-        gameServer.define('my_room', MyRoom);
         gameServer.define('dice_game', DiceGameRoom); // Define DiceGameRoom
+
+        gameServer.define(`lobby`, LobbyRoom)
     },
 
     initializeExpress: (app) => {
