@@ -20,6 +20,16 @@ export class LobbyRoom extends GameRoom {
 
     }
     super.onCreate(Object.assign(options, superOptions));
+
+    this.onMessage("START_GAME", (client) => {
+      console.log(`LobbyRoom.onMessage START_GAME ${client.auth.id} ${this.state.dbGame.gmId}`);
+      if(client.auth.id === this.state.dbGame.gmId) {
+        this.onAllPlayersReady();
+      } else {
+        console.log(`Client ${client.auth.id} tried to start the game but is not the GM.`);
+      }
+  });
+  
   }
 
   // When a client joins the room
@@ -35,10 +45,24 @@ export class LobbyRoom extends GameRoom {
   }
 
   // When a client sends a message
-  onMessage(client, message) {
-    //console.log('LobbyRoom.onMessage', client.auth.id, message);
-    super.onMessage(client, message);
-    // Handle message. This could include chat messages, or signals that the player is ready to start the game
+  // onMessage(client, message) {
+  //   //console.log('LobbyRoom.onMessage', client.auth.id, message);
+  //   console.log('LobbyRoom.onMessage', client.auth.id, message);
+  //   // Handle message. This could include chat messages, or signals that the player is ready to start the game
+  //   if(message === 'START_GAME') {
+  //   if(client.auth.id === this.state.dbGame.gmId) {
+  //     this.onAllPlayersReady();
+  //   } else {
+  //       console.log(`Client ${client.auth.id} tried to start the game but is not the GM.`);
+  //   }
+  // }
+  // }
+
+  onAllPlayersReady() {
+    // Notify all clients that they should join the Character Generation room.
+    this.broadcast('MOVE_TO_CHARACTER_GENERATION');
+    // Close the current room.
+    this.disconnect();
   }
 
   // Cleanup callback, called after there is no more clients in the room. (see `autoDispose`)

@@ -6,6 +6,7 @@ import { monitor } from "@colyseus/monitor";
  */
 import { DiceGameRoom } from "./rooms/DiceGameRoom.js"; // Import DiceGameRoom
 import { LobbyRoom } from "./rooms/LobbyRoom.js"; // Import LobbyRoom
+import { MGT2ECharCreateRoom } from "./rooms/MGT2ECharCreateRoom.js"; // Import MGT2ECharCreateRoom
 
 export default config.default({
 
@@ -16,6 +17,8 @@ export default config.default({
         gameServer.define('dice_game', DiceGameRoom); // Define DiceGameRoom
 
         gameServer.define(`lobby`, LobbyRoom)
+
+        gameServer.define(`chargen_mgt2e`, MGT2ECharCreateRoom)
     },
 
     initializeExpress: (app) => {

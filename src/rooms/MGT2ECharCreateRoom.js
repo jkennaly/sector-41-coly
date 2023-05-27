@@ -1,61 +1,81 @@
-import GameRoom from './GameRoom.js';
-import DiceGameState from './schema/DiceGameState.js';
-import Player from './schema/Player.js';
+import { GameRoom } from './GameRoom.js';
+import Mgt2eState from './schema/Mgt2eState.js';
 
-export class DiceGameRoom extends GameRoom {
+export class MGT2ECharCreateRoom extends GameRoom {
+
+  async onAuth(client, options, request) {
+    //call super.onAuth to check if the user is authenticated
+    //if the user is authenticated, then the user's id will be in client.auth.id
+    //if the user is not authenticated, then client.auth.id will be undefined
+    const auth = await super.onAuth(client, options, request);
+    //console.log('MGT2ECharCreateRoom.onAuth auth', auth);
+    return auth
+  }
+
+  // When room is initialized
   onCreate(options) {
-    super.onCreate(options);
-    this.setState(new DiceGameState());
+    const superOptions = {
+      stateConstructor: Mgt2eState,
+      state: { dbGame: {}, creator: {}}
 
-    this.onMessage("roll_dice", (client, message) => {
-      // This code will run when a "roll_dice" message is received from a client.
-      const rollResult = this.rollDice(); // Assume you have a method to do this.
-      
-      // Set the roll result for this player
-      this.state.players.get(client.sessionId).roll = rollResult;
-  
-      // Now you might want to change the current turn to the next player.
-      this.nextPlayerId(this.state.currentTurn);
-    });
-  }
-  rollDice() {
-    return Math.floor(Math.random() * 6) + 1; // Returns a number between 1 and 6.
-  }
+    }
+    super.onCreate(Object.assign(options, superOptions));
 
-  onJoin(client, options) {
-    //before creating a new player, check if the user is already in the game
-    //if the client.auth.id matches any player's id, then use that player
-    //otherwise, create a new player
-    const playerIds = Object.keys(this.state.players);
-    const playerId = playerIds.find((playerId) => {
-      return playerId === client.auth.id;
+    this.onMessage("CREATE_CHARACTER", async (client) => {
+      console.log(`MGT2ECharCreateRoom.onMessage CREATE_CHARACTER ${client.auth.id} ${this.state.dbGame.gmId}`);
+      /*
+      if(client.auth.id === this.state.dbGame.gmId) {
+        //create a new npc character
+        const gameId = this.state.dbGame.id;
+    const cmd = new AxiosPostCommand();
+    const data = await this.dispatcher.dispatch(cmd, {
+      token: client.auth.token, // assuming client.auth.token contains the authentication token
+      apiRoute: `/api/games/mgt2e/chargen/${gameId}`,
     });
-    if (playerId) {
-      this.state.players[client.sessionId] = this.state.players[playerId];
-      delete this.state.players[playerId];
-    } else {
-      const player = new Player({ sessionId: client.sessionId, auth: client.auth, options});
-      this.state.players[client.sessionId] = player;
-      if (Object.keys(this.state.players).length === 1) {
-        this.state.currentTurn = client.sessionId;
+      } else {
+        //verify the user does not already have a pc character
+        if(this.state.pcs[client.auth.id]) {
+        //create a new pc character
+        const gameId = this.state.dbGame.id;
+    const cmd = new AxiosPostCommand();
+    const data = await this.dispatcher.dispatch(cmd, {
+      token: client.auth.token, // assuming client.auth.token contains the authentication token
+      apiRoute: `/api/games/mgt2e/chargen/${gameId}`,
+    });
+
+    // assuming that the data returned contains the created character
+    this.state.pcs[client.auth.id] = data.character;
+
       }
     }
-    this.state.resetCurrentTurn();
+    */
+  });
   }
 
+  // When a client joins the room
+  onJoin(client, options, auth) {
+    //console.log('MGT2ECharCreateRoom.onJoin', client.auth.id, options);
+    super.onJoin(client, options, auth);
+  }
+
+  // When a client leaves the room
   onLeave(client, consented) {
+    super.onLeave(client, consented);
     delete this.state.players[client.sessionId];
-    this.state.resetCurrentTurn();
   }
 
-  nextPlayerId(currentPlayerId) {
-    const playerIds = Object.values(this.state.players).filter(Boolean).map(x => x.id);
-    const currentPlayerIndex = playerIds.indexOf(currentPlayerId);
-    if (currentPlayerIndex === playerIds.length - 1) {
-      return playerIds[0];
-    } else {
-      return playerIds[currentPlayerIndex + 1];
-    }
+  onAllPlayersReady() {
+    // Notify all clients that they should join the Character Generation room.
+    this.broadcast('MOVE_TO_CHARACTER_GENERATION');
+    // Close the current room.
+    this.disconnect();
+  }
+
+  // Cleanup callback, called after there is no more clients in the room. (see `autoDispose`)
+  onDispose() {
+    super.onDispose();
+    // Cleanup
   }
 }
 
+export default MGT2ECharCreateRoom;
