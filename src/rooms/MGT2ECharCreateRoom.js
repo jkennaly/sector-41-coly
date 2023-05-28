@@ -1,5 +1,7 @@
 import { GameRoom } from './GameRoom.js';
 import Mgt2eState from './schema/Mgt2eState.js';
+import { AxiosPostCommand } from "../commands/util/DB.js";
+import {Character} from './schema/character/mgt2e/Character.js';
 
 export class MGT2ECharCreateRoom extends GameRoom {
 
@@ -22,33 +24,41 @@ export class MGT2ECharCreateRoom extends GameRoom {
     super.onCreate(Object.assign(options, superOptions));
 
     this.onMessage("CREATE_CHARACTER", async (client) => {
-      console.log(`MGT2ECharCreateRoom.onMessage CREATE_CHARACTER ${client.auth.id} ${this.state.dbGame.gmId}`);
-      /*
+      const token = this.tokens[client.auth.id]
+      console.log(`MGT2ECharCreateRoom.onMessage CREATE_CHARACTER tokenLength: ${token && token.length} ${client.auth.id} ${this.state.dbGame.gmId}`);
+      let data
       if(client.auth.id === this.state.dbGame.gmId) {
+        console.log('Creating NPC')
         //create a new npc character
         const gameId = this.state.dbGame.id;
     const cmd = new AxiosPostCommand();
-    const data = await this.dispatcher.dispatch(cmd, {
-      token: client.auth.token, // assuming client.auth.token contains the authentication token
+    data = await this.dispatcher.dispatch(cmd, {
+      token, // assuming client.auth.token contains the authentication token
       apiRoute: `/api/games/mgt2e/chargen/${gameId}`,
     });
+    //use the data returned to instantiate a new npc character
+    const character = new Character(data);
+    this.state.npcs.push(character)
+    console.log(`MGT2ECharCreateRoom.onMessage CREATE_CHARACTER NPC ${JSON.stringify(data)}`);
       } else {
         //verify the user does not already have a pc character
         if(this.state.pcs[client.auth.id]) {
+          console.log('Creating PC')
         //create a new pc character
         const gameId = this.state.dbGame.id;
     const cmd = new AxiosPostCommand();
-    const data = await this.dispatcher.dispatch(cmd, {
-      token: client.auth.token, // assuming client.auth.token contains the authentication token
+    data = await this.dispatcher.dispatch(cmd, {
+      token, // assuming client.auth.token contains the authentication token
       apiRoute: `/api/games/mgt2e/chargen/${gameId}`,
     });
 
     // assuming that the data returned contains the created character
-    this.state.pcs[client.auth.id] = data.character;
+    const character = new Character(data);
+    this.state.pcs[client.auth.id] = character;
 
       }
     }
-    */
+    
   });
   }
 

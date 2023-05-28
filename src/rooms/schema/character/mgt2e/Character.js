@@ -12,13 +12,14 @@ import { Skills } from './sections/Skills.js';
 import { Weapon } from './sections/Weapons.js';
 
 class Character extends Schema {
-    constructor() {
+    constructor(params) {
         super();
-        this.id = 0;
-        this.gameId = 0;
+        this.id = params.id;
+        this.ownerId = params.ownerId;
+        this.gameId = parseInt(params.gameId, 10);
         this.sourceReference = new SourceReference();
         this.history = new ArraySchema();
-        this.location = {};
+        this.location = undefined;
         this.armor = new ArraySchema();
         this.augmentations = new ArraySchema();
         this.coreCharacteristics = new CoreCharacteristics();
@@ -28,6 +29,7 @@ class Character extends Schema {
         this.personalDataFile = new PersonalDataFile();
         this.skills = new ArraySchema();
         this.weapons = new ArraySchema();
+        
     }
 }
 
@@ -45,7 +47,8 @@ schema.defineTypes(Character, {
     lifePaths: [LifePath],
     personalDataFile: PersonalDataFile,
     skills: [Skills],
-    weapons: [Weapon]
+    weapons: [Weapon],
+    ownerId: "number"
 });
 
 export { Character };

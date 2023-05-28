@@ -6,12 +6,14 @@ export class SourceReference extends Schema {
         super();
         this.book = "";
         this.page = 0;
+        this.notes = "";
     }
 }
 
 schema.defineTypes(SourceReference, {
     book: "string",
-    page: "number"
+    page: "number",
+    notes: "string"
 });
 
 export default SourceReference;
