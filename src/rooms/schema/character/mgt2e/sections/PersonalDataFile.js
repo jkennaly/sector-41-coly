@@ -7,7 +7,7 @@ class PersonalDataFile extends Schema {
         this.Name = "";
         this.Species = "";
         this.Traits = new ArraySchema();
-        this.Age = 0;
+        this.Age = 18;
         this.Homeworld = "";
         this.Title = "";
         this.DistinguishingFeatures = new ArraySchema();

@@ -3,6 +3,7 @@ import { Command } from "@colyseus/command";
 import { AxiosGetCommand } from "./util/DB.js";
 import Player from '../rooms/schema/Player.js';
 import Game from '../rooms/schema/db/Game.js';
+import {Character} from '../rooms/schema/character/mgt2e/Character.js';
 
 export class OnJoinCommand extends Command {
 
@@ -36,6 +37,45 @@ export class OnJoinCommand extends Command {
             const game = new Game(data);
             //console.log('EnsureGameInstanceCommand game:', game);
             this.state.dbGame = game;
+            //get players and assign as pcs or npcs
+            //console.log('EnsureGameInstanceCommand game.players:', game.players);
+
+            const charCmd = new AxiosGetCommand();
+            const charData = await this.room.dispatcher.dispatch(charCmd, {
+              token,
+              apiRoute: '/api/games/' + options.gameId + '/characters',
+            });
+            console.log('EnsureGameInstanceCommand charData:', charData);
+            //update state.pcs and state.npcs from charData.pcs and charData.npcs
+            if(charData.pcs) {
+              if(!Object.keys(this.state.pcs).length) this.state.pcs = charData.pcs;
+              else {
+                //add new pcs from charData.pcs to state.pcs, but do not overwrite.
+                //Both objects are keyed by pc.ownerId
+                const existingPlayers = Object.keys(this.state.pcs);
+                existingPlayers.forEach(playerId => {
+                  delete charData.pcs[playerId];
+                });
+                //create Characters from the charData.pcs and add them to state.pcs
+                for(const pc of Object.values(charData.pcs)) {
+                  const character = new Character(pc);
+                  this.state.pcs[character.ownerId] = character;
+                }
+
+              }
+            }
+            if(charData.npcs) {
+              //merge the charData.npcs into state.npcs, keeping state where npc.id is already in state
+
+              const newNpcs = charData.npcs
+                .filter(npc => !this.state.npcs.some(stateNpc => stateNpc.id === npc.id))
+                .map(npc => new Character(npc))
+              
+              this.state.npcs = this.state.npcs.concat(newNpcs);
+
+            }
+
+
         }
 
     }
