@@ -47,8 +47,8 @@ export class OnJoinCommand extends Command {
             });
             console.log('EnsureGameInstanceCommand charData:', charData);
             //update state.pcs and state.npcs from charData.pcs and charData.npcs
-            if(charData.pcs) {
-              if(!Object.keys(this.state.pcs).length) this.state.pcs = charData.pcs;
+            if(charData && charData.pcs) {
+              if(!this.state.pcs || !Object.keys(this.state.pcs).length) this.state.pcs = charData.pcs;
               else {
                 //add new pcs from charData.pcs to state.pcs, but do not overwrite.
                 //Both objects are keyed by pc.ownerId

@@ -41,7 +41,6 @@ export class LobbyRoom extends GameRoom {
   // When a client leaves the room
   onLeave(client, consented) {
     super.onLeave(client, consented);
-    delete this.state.players[client.sessionId];
   }
 
   // When a client sends a message
