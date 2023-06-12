@@ -45,7 +45,7 @@ export class OnJoinCommand extends Command {
               token,
               apiRoute: '/api/games/' + options.gameId + '/characters',
             });
-            console.log('EnsureGameInstanceCommand charData:', charData);
+            //console.log('EnsureGameInstanceCommand charData:', charData);
             //update state.pcs and state.npcs from charData.pcs and charData.npcs
             if(charData && charData.pcs) {
               if(!this.state.pcs || !Object.keys(this.state.pcs).length) this.state.pcs = charData.pcs;
@@ -68,8 +68,10 @@ export class OnJoinCommand extends Command {
               //merge the charData.npcs into state.npcs, keeping state where npc.id is already in state
 
               const newNpcs = charData.npcs
-                .filter(npc => !this.state.npcs.some(stateNpc => stateNpc.id === npc.id))
+                .filter(npc => !this.state.npcs || !this.state.npcs.some(stateNpc => stateNpc.id === npc.id))
                 .map(npc => new Character(npc))
+
+              this.state.npcs = this.state.npcs || [];
               
               this.state.npcs = this.state.npcs.concat(newNpcs);
 
