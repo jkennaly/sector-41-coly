@@ -1,9 +1,11 @@
 import * as schema from "@colyseus/schema";
 const Schema = schema.Schema;
+import DiceRoll from "./DiceRoll.js";
 
 class Player extends Schema {
   constructor(options) {
     super();
+    this.rollResults = [] 
     this.roll = 0;
     this.id = options?.auth?.id;
     this.nickname = options?.auth?.nickname || options?.sessionId || 'anonymous';
@@ -13,6 +15,7 @@ class Player extends Schema {
 }
 
 schema.defineTypes(Player, {
+  rollResults: [DiceRoll],
   roll: 'number',
   id: 'number',
   nickname: 'string',

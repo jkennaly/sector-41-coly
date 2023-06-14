@@ -2,6 +2,7 @@ import { GameRoom } from './GameRoom.js';
 import Mgt2eState from './schema/Mgt2eState.js';
 import { AxiosPostCommand } from "../commands/util/DB.js";
 import {Character} from './schema/character/mgt2e/Character.js';
+import { RollDiceCommand } from '../commands/RollDiceCommand.js';
 
 export class MGT2ECharCreateRoom extends GameRoom {
 
@@ -22,6 +23,12 @@ export class MGT2ECharCreateRoom extends GameRoom {
 
     }
     super.onCreate(Object.assign(options, superOptions));
+
+    this.onMessage("ROLL_MGT2E_CHARGEN", (client, message) => {
+      this.dispatcher.dispatch(new RollDiceCommand(), {
+        id: client.auth.id
+      });
+    });
 
     this.onMessage("CREATE_CHARACTER", async (client) => {
       const token = this.tokens[client.auth.id]

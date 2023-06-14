@@ -80,11 +80,16 @@ export class OnJoinCommand extends Command {
 
         }
 
+        const playerAssignCmd = new AssignAsPlayerCommand();
+        const data = await this.room.dispatcher.dispatch(playerAssignCmd, {
+          client, options
+        });
+
     }
   }
   
   class AssignAsPlayerCommand extends Command {
-    execute({ client, options, gameInstance }) {
+    execute({ client, options }) {
       // Your logic here
       // You can access the result of the previous command in the options
       const player = this.state.players[client.auth.id]
@@ -96,7 +101,7 @@ export class OnJoinCommand extends Command {
   }
   
   class AssignAsGmCommand extends Command {
-    execute({ client, options, gameInstance, playerInstance }) {
+    execute({ client, options, playerInstance }) {
       // Your logic here
       // You can access the results of previous commands in the options
     }
