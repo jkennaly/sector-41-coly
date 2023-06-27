@@ -11,6 +11,7 @@ class Player extends Schema {
     this.nickname = options?.auth?.nickname || options?.sessionId || 'anonymous';
     //if there is no picture on the auth object, use the gravatar of userEmail
     this.picture = options?.auth?.picture || `https://www.gravatar.com/avatar/${options?.auth?.email}`;
+    this.keyedRolls = {};
   }
 }
 
@@ -20,6 +21,7 @@ schema.defineTypes(Player, {
   id: 'number',
   nickname: 'string',
   picture: 'string',
+  keyedRolls: { map: DiceRoll },
 });
 
 export default Player;

@@ -3,6 +3,7 @@ import jwksClient from 'jwks-rsa';
 import jwt from 'jsonwebtoken';
 import command from '@colyseus/command'
 import { OnJoinCommand } from "../commands/OnJoinCommand.js";
+import { ClearRollResultsCmd } from "../commands/ClearRollResults.js";
 import { AxiosPostCommand } from "../commands/util/DB.js";
 // You need to set these
 const JWKS_URI = 'http://localhost:3000/keys';

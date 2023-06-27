@@ -21,6 +21,17 @@ export class LobbyRoom extends GameRoom {
     }
     super.onCreate(Object.assign(options, superOptions));
 
+
+
+    this.onMessage("CLEAR_ROLL_RESULTS", (client, message) => {
+      console.log('LobbyRoom.onMessage CLEAR_ROLL_RESULTS', message);
+      this.dispatcher.dispatch(new ClearRollResultsCmd(), {
+        id: client.auth.id
+      });
+    });
+    this.onMessage("ROLL_BASIC", (client, message) => {
+      console.log('LobbyRoom.onMessage ROLL_BASIC', client.auth.id, message);
+    });
     this.onMessage("START_GAME", (client) => {
       console.log(`LobbyRoom.onMessage START_GAME ${client.auth.id} ${this.state.dbGame.gmId}`);
       if(client.auth.id === this.state.dbGame.gmId) {

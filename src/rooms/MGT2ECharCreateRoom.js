@@ -2,7 +2,10 @@ import { GameRoom } from './GameRoom.js';
 import Mgt2eState from './schema/Mgt2eState.js';
 import { AxiosPostCommand } from "../commands/util/DB.js";
 import {Character} from './schema/character/mgt2e/Character.js';
-import { RollDiceCommand } from '../commands/RollDiceCommand.js';
+import { RollDiceCommand as RollCharCmd } from '../commands/RollMgt2eChar.js';
+import { RollBasicCommand as RollBasicCmd } from '../commands/RollBasic.js';
+import { RollKeyedCommand as RollKeyedCmd } from '../commands/RollKeyed.js';
+import { ClearRollResultsCmd } from '../commands/ClearRollResults.js';
 
 export class MGT2ECharCreateRoom extends GameRoom {
 
@@ -24,18 +27,64 @@ export class MGT2ECharCreateRoom extends GameRoom {
     }
     super.onCreate(Object.assign(options, superOptions));
 
+    this.onMessage("CLEAR_ROLL_RESULTS", (client, message) => {
+      //console.log('MGT2ECharCreateRoom.onMessage CLEAR_ROLL_RESULTS', message);
+      this.dispatcher.dispatch(new ClearRollResultsCmd(), {
+        id: client.auth.id
+      });
+    });
+
+    this.onMessage("ROLL_BASIC", (client, message) => {
+      this.dispatcher.dispatch(new RollBasicCmd(), {
+        id: client.auth.id
+      });
+    });
+
+    this.onMessage("ROLL_KEYED", (client, message) => {
+      //console.log('MGT2ECharCreateRoom.onMessage ROLL_KEYED', message);
+      this.dispatcher.dispatch(new RollKeyedCmd(), {
+        id: client.auth.id,
+        key: message?.options?.key
+      });
+    });
+
+    this.onMessage("ROLL_KEYED_1D3", (client, message) => {
+      //console.log('MGT2ECharCreateRoom.onMessage ROLL_KEYED_1D3', message);
+      this.dispatcher.dispatch(new RollKeyedCmd(), {
+        id: client.auth.id,
+        key: message?.options?.key,
+        max: 3,
+        count: 1
+      });
+    });
+
+    this.onMessage("ROLL_KEYED_1D6", (client, message) => {
+      //console.log('MGT2ECharCreateRoom.onMessage ROLL_KEYED_1D6', message);
+      this.dispatcher.dispatch(new RollKeyedCmd(), {
+        id: client.auth.id,
+        key: message?.options?.key,
+        max: 6,
+        count: 1
+      });
+    });
+
+    this.onMessage("0", (client, message) => {
+      console.log('MGT2ECharCreateRoom.onMessage 0', client.auth.id, message);
+    });
+
     this.onMessage("ROLL_MGT2E_CHARGEN", (client, message) => {
-      this.dispatcher.dispatch(new RollDiceCommand(), {
+      //console.log('MGT2ECharCreateRoom.onMessage ROLL_MGT2E_CHARGEN', message);
+      this.dispatcher.dispatch(new RollCharCmd(), {
         id: client.auth.id
       });
     });
 
     this.onMessage("CREATE_CHARACTER", async (client) => {
       const token = this.tokens[client.auth.id]
-      console.log(`MGT2ECharCreateRoom.onMessage CREATE_CHARACTER tokenLength: ${token && token.length} ${client.auth.id} ${this.state.dbGame.gmId}`);
+      //console.log(`MGT2ECharCreateRoom.onMessage CREATE_CHARACTER tokenLength: ${token && token.length} ${client.auth.id} ${this.state.dbGame.gmId}`);
       let data
       if(client.auth.id === this.state.dbGame.gmId) {
-        console.log('Creating NPC')
+        //console.log('Creating NPC')
         //create a new npc character
         const gameId = this.state.dbGame.id;
     const cmd = new AxiosPostCommand();
@@ -46,11 +95,11 @@ export class MGT2ECharCreateRoom extends GameRoom {
     //use the data returned to instantiate a new npc character
     const character = new Character(data);
     this.state.npcs.push(character)
-    console.log(`MGT2ECharCreateRoom.onMessage CREATE_CHARACTER NPC ${JSON.stringify(data)}`);
+    //console.log(`MGT2ECharCreateRoom.onMessage CREATE_CHARACTER NPC ${JSON.stringify(data)}`);
       } else {
         //verify the user does not already have a pc character
         if(this.state.pcs[client.auth.id]) {
-          console.log('Creating PC')
+          //console.log('Creating PC')
         //create a new pc character
         const gameId = this.state.dbGame.id;
     const cmd = new AxiosPostCommand();

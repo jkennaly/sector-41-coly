@@ -1,5 +1,5 @@
 import { Command } from "@colyseus/command";
-import DiceRoll from "../rooms/schema/DiceRoll.js";
+import { rollDice } from "../util/RollFunctions.js";
 
 // Function to find an object by its id
 function findById(map, id) {
@@ -19,12 +19,12 @@ export class RollDiceCommand extends Command {
     let rollResults = [];
     // Roll 2D6 4 times
     for(let i = 0; i < 4; i++){
-      rollResults.push(this.rollDice(2, 6));
+      rollResults.push(rollDice(2, 6));
     }
     
     // Roll 3D6 and drop the lowest, twice
     for(let i = 0; i < 2; i++){
-      let roll = this.rollDice(3, 6, true);
+      let roll = rollDice(3, 6, true);
       rollResults.push(roll);
     }
 
@@ -35,25 +35,4 @@ export class RollDiceCommand extends Command {
     this.room.broadcast("rollResults", {id, rollResults});
   }
 
-  // Helper function to roll dice
-  rollDice(diceCount, sides, dropLowest = false) {
-    let rolls = [];
-    const drops = [];
-    for(let i = 0; i < diceCount; i++){
-      rolls.push(Math.floor(Math.random() * sides) + 1);
-    }
-
-    if(dropLowest){
-      // Sort and drop the lowest
-      rolls.sort((a, b) => a - b);
-      const [drop, ...remaining] = rolls;
-      rolls = remaining;
-      drops.push(drop);
-    }
-
-    // Sum remaining dice
-    let sum = rolls.reduce((a, b) => a + b, 0);
-
-    return new DiceRoll({rolls, sum, drops});
-  }
 }
